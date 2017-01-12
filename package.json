@@ -1,12 +1,12 @@
 {
-  "name": "skyweb",
+  "name": "frkskyweb",
   "description": "Unofficial Skype API for nodejs via 'Skype (HTTP)'",
   "version": "0.2.0",
   "license": "MIT",
   "main": "./dist/src/skyweb.js",
   "repository": {
     "type": "git",
-    "url": "git://github.com/ShyykoSerhiy/skyweb.git"
+    "url": "git://github.com/FrankSunnyvale/skyweb.git"
   },
   "keywords": [
     "Skype"

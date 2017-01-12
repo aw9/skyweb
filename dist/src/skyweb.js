@@ -1,8 +1,9 @@
 "use strict";
-var skype_account_1 = require('./skype_account');
-var contacts_service_1 = require('./contacts_service');
-var request = require('request');
+var skype_account_1 = require("./skype_account");
+var contacts_service_1 = require("./contacts_service");
+var request = require("request");
 var login_1 = require("./login");
+var Logout = require("./logout");
 var poll_1 = require("./polling/poll");
 var message_service_1 = require("./message_service");
 var status_service_1 = require("./status_service");
@@ -36,7 +37,57 @@ var Skyweb = (function () {
                     _this.authRequestCallback(requestData);
                 }
             });
+            console.log("expires="+skypeAccount.registrationTokenParams.expires);
             return skypeAccount;
+        }).then(function (skypeAccount) {
+            var interval;
+            var count = 0;
+            function reloginLoop() {
+                interval = setInterval(function() {
+                    _this.relogin(username, password).then(function(resolve_result) {
+                        count = 0;
+                        console.log("relogin suc.");
+                    }, function(reject_result) {
+                        count++;
+                        console.log("relogin failed, message="+reject_result+", try again "+count+"...");
+                        clearInterval(interval);
+                        interval = null;
+                        setTimeout(function(){
+                            reloginLoop();
+                        }, 60*1000);
+                    });
+                },Math.min(
+                    Math.max(skypeAccount.registrationTokenParams.expires - ~~(Date.now()/1000) - 2*60*60,
+                      1*60),
+                    12*60*60)*1000);
+            }
+            reloginLoop();
+        });
+    };
+    Skyweb.prototype.relogin = function (username, password) {
+        var _this = this;
+        return new es6_promise_1.Promise(function (resolve, reject) {
+            return new Logout(_this.cookieJar).doLogout().then(function (resolve_result) {
+                _this.skypeAccount = new skype_account_1.default(username, password);
+                return new login_1.default(_this.cookieJar).doLogin(_this.skypeAccount).then(function (skypeAccount) {
+                    return new es6_promise_1.Promise(_this.contactsService.loadContacts.bind(_this.contactsService, skypeAccount));
+                }).then(function (skypeAccount) {
+                    new poll_1.default(_this.cookieJar).pollAll(skypeAccount, function (messages) {
+                        if (_this.messagesCallback) {
+                            _this.messagesCallback(messages);
+                        }
+                    });
+                    new auth_request_1.default(_this.cookieJar).pollAll(skypeAccount, function (requestData) {
+                        if (_this.authRequestCallback) {
+                            _this.authRequestCallback(requestData);
+                        }
+                    });
+                    console.log("skypeAccount.registrationTokenParams.expires="+skypeAccount.registrationTokenParams.expires);
+                    resolve(skypeAccount);
+                });
+            }, function (reject_result) {
+                reject(reject_result);
+            });
         });
     };
     Skyweb.prototype.sendMessage = function (conversationId, message, messagetype, contenttype) {
