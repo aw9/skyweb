@@ -1,7 +1,7 @@
 {
   "name": "frkskyweb",
   "description": "Unofficial Skype API for nodejs via 'Skype (HTTP)'",
-  "version": "0.2.0-relogin",
+  "version": "0.2.1",
   "license": "MIT",
   "main": "./dist/src/skyweb.js",
   "repository": {
