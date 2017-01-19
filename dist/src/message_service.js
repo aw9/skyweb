@@ -18,11 +18,17 @@ var MessageService = (function () {
                 'RegistrationToken': skypeAccount.registrationTokenParams.raw
             }
         }, function (error, response, body) {
-            if (!error && response.statusCode === 201) {
+            if (!error && response && response.statusCode === 201) {
             }
             else {
+		var statusCode;
+		if (response && response.statusCode) {
+			statusCode = response.statusCode;
+		} else {
+			statusCode = "response is undefined or response.statusCode is undefined";
+		}
                 utils_1.default.throwError('Failed to send message.' +
-                    '.\n Error code: ' + response.statusCode +
+                    '.\n Error code: ' + statusCode +
                     '.\n Error: ' + error +
                     '.\n Body: ' + body);
             }
