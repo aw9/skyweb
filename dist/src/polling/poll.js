@@ -37,7 +37,8 @@ var Poll = (function () {
     Poll.parsePollResult = function (pollResult, messagesCallback) {
         if (pollResult.eventMessages) {
             var messages = pollResult.eventMessages.filter(function (item) {
-                return item.resourceType === 'NewMessage';
+                return (item.resourceType === 'NewMessage' ||
+                        item.resourceType === 'UserPresence');
             });
             if (messages.length) {
                 messagesCallback(messages);

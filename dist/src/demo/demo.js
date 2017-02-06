@@ -23,10 +23,15 @@ skyweb.authRequestCallback = function (requests) {
 };
 skyweb.messagesCallback = function (messages) {
     messages.forEach(function (message) {
-        if (message.resource.from.indexOf(username) === -1 && message.resource.messagetype !== 'Control/Typing' && message.resource.messagetype !== 'Control/ClearTyping') {
-            var conversationLink = message.resource.conversationLink;
-            var conversationId = conversationLink.substring(conversationLink.lastIndexOf('/') + 1);
-            skyweb.sendMessage(conversationId, message.resource.content + '. Cats will rule the World');
+        if (message.resourceType === 'NewMessage') {
+            if (message.resource.from.indexOf(username) === -1 && message.resource.messagetype !== 'Control/Typing' && message.resource.messagetype !== 'Control/ClearTyping') {
+                var conversationLink = message.resource.conversationLink;
+                var conversationId = conversationLink.substring(conversationLink.lastIndexOf('/') + 1);
+                skyweb.sendMessage(conversationId, message.resource.content + '. Cats will rule the World');
+            }
+        }
+        else if (message.resourceType === 'UserPresence') {
+            console.log(JSON.stringify(message, null, 2));
         }
     });
 };
